@@ -105,6 +105,53 @@ router.get('/users/me', auth, async(req, res) => {
     res.send(req.user)
 })
 
+// Route to handle forgot password request
+router.post('/users/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        // Check if the email exists in the database
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).send({ error: 'Email not found' });
+        }
+
+        // Generate a new random password
+        const newPassword = Math.random().toString(36).slice(-8); // Generate an 8-character random password
+        user.password = newPassword;
+        await user.save();
+
+        // Send the new password to the user's email
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                email: user.email, // Your email address for sending emails
+                pass: user.password // Your email password
+            }
+        });
+
+        const mailOptions = {
+            from: 'your_email@gmail.com',
+            to: email,
+            subject: 'Forgot Password - New Password',
+            text: `Your new password is: ${newPassword}`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error sending email:', error);
+                res.status(500).send({ error: 'Failed to send email' });
+            } else {
+                console.log('Email sent:', info.response);
+                res.send({ message: 'New password sent to your email' });
+            }
+        });
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        res.status(500).send({ error: 'Internal server error' });
+    }
+});
+
 router.post('/users/me/logout', auth, async (req, res) => {
     // Log user out of the application
     try {
