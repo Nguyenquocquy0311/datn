@@ -16,13 +16,13 @@ router.get('/users', async (req, res) => {
 })
 
 // Route to get login history of a specific user
-router.get('/users/:_id/login-history', auth, async (req, res) => {
+router.get('/users/:_id/login-history', async (req, res) => {
     try {
         const userId = req.params._id
 
         // Find the user by their _id
         const user = await User.findById(userId)
-
+        console.log(user.loginHistory)
         if (!user) {
             return res.status(404).send({ error: 'User not found' })
         }

@@ -12,6 +12,9 @@ const initialUserInfoState = {
   email: 'quy@gmail.com',
   role: 'manager',
   name: '',
+  password: '',
+  position: '',
+  department: ''
 };
 
 // Slices

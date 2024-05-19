@@ -48,9 +48,6 @@ const userSchema = mongoose.Schema({
         timestamp: {
             type: Date,
             default: Date.now
-        },
-        ipAddress: {
-            type: String
         }
     }]
 })
