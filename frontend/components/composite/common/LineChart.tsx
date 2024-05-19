@@ -8,8 +8,10 @@ const Bar = dynamic(() => import('react-chartjs-2').then((mod) => mod.Bar), {
 
 const LineChart = () => {
   const [requests, setRequests] = useState([]);
+  const [assets, setAssets] = useState([]);
+  const [selectedAsset, setSelectedAsset] = useState('');
 
-  const fetchData = async () => {
+  const fetchRequests = async () => {
     try {
       const response = await fetch('http://localhost:4000/requests');
       if (!response.ok) {
@@ -22,35 +24,50 @@ const LineChart = () => {
     }
   };
 
+  const fetchAssets = async () => {
+    try {
+      const response = await fetch('http://localhost:4000/assets');
+      if (!response.ok) {
+        throw new Error('Failed to fetch assets');
+      }
+      const data = await response.json();
+      setAssets(data);
+    } catch (error) {
+      console.error('Error fetching assets:', error);
+    }
+  };
+
   useEffect(() => {
-    fetchData();
+    fetchRequests();
+    fetchAssets();
   }, []);
 
-  const filteredRequests = requests.filter(request => request?.isApproved);
-  const monthBorrowCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // Initialize an array to hold the counts for each month
-  const monthPayCounts = [0,0,0,0,0,0,0,0,0,0,0,0]; 
+  const handleAssetChange = (event) => {
+    setSelectedAsset(event.target.value);
+  };
 
-for (let i = 0; i < filteredRequests.length; i++) {
-  const dateString = filteredRequests[i].approvalDate;
-  const date = new Date(dateString);
-  const month = date.getMonth() + 1; // JavaScript months are zero-based, so we add 1
-  const paddedMonth = month < 10 ? '0' + month : month; // Pad single-digit months with leading zero if needed
+  const filteredRequests = requests.filter(
+    (request) => request.isApproved && (selectedAsset === '' || request.assetName === selectedAsset)
+  );
 
-  const monthInt = parseInt(paddedMonth, 10); // Parse the string to an integer using parseInt()
+  const monthBorrowCounts = Array(12).fill(0);
+  const monthPayCounts = Array(12).fill(0);
 
-  var index = monthInt - 1; // Adjust index to start from 0
-  if (filteredRequests[i]?.type === 'Mượn') {
-    monthBorrowCounts[index]++
-  } else {
-    monthPayCounts[index]++
+  for (let i = 0; i < filteredRequests.length; i++) {
+    const date = new Date(filteredRequests[i].approvalDate);
+    const month = date.getMonth(); // JavaScript months are zero-based
+    if (filteredRequests[i].type === 'Mượn') {
+      monthBorrowCounts[month]++;
+    } else {
+      monthPayCounts[month]++;
+    }
   }
-}
 
   const data = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], // Các nhãn cho các tháng,
+    labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
     datasets: [
       {
-        label: 'Page Views',
+        label: 'Lượt mượn',
         data: monthBorrowCounts,
         yAxisID: 'y-axis-1',
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -58,7 +75,7 @@ for (let i = 0; i < filteredRequests.length; i++) {
         borderWidth: 1,
       },
       {
-        label: 'Users',
+        label: 'Lượt trả',
         data: monthPayCounts,
         yAxisID: 'y-axis-2',
         backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -86,11 +103,24 @@ for (let i = 0; i < filteredRequests.length; i++) {
   };
 
   return (
-    <div className='mx-auto bg-white mt-8 p-4 rounded-xl w-full h-full justify-center'>
-      <h1>Example 2: Bar Chart</h1>
+    <div className='bg-white mt-8 p-8 rounded-xl w-full h-[85vh]'>
+      <div className='flex'>
+        <p className='text-[20px]'>Số lượt mượn/trả {selectedAsset}</p>
+        <div className='fixed right-10'>
+          <label htmlFor="asset-select" className='text-blue-500 text-[16px]'>Chọn tài sản</label>
+          <select id="asset-select" value={selectedAsset} onChange={handleAssetChange} className='mx-4 border border-blue-500 text-neutral-400 p-1 rounded-md'>
+            <option value="">Tất cả tài sản</option>
+            {assets.map((asset) => (
+              <option key={asset.id} value={asset.id}>
+                {asset.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
       <Bar data={data} options={options} />
     </div>
   );
 };
 
-export default LineChart; 
+export default LineChart;

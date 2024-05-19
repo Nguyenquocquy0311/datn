@@ -17,7 +17,9 @@ import {
   setActiveUserTab,
   setActiveDashboardTab,
   getDashboardTab,
+  getUserInfo,
 } from '../../../slices/redux';
+import { ClipboardIcon } from './icon/ClipboardIcon';
 
 const MenuBar = () => {
   const router = useRouter();
@@ -28,12 +30,14 @@ const MenuBar = () => {
   const isAssetTabActive = useSelector(getAssetTab)
   const isUserTabActive = useSelector(getUserTab)
   const isDashboardTabActive = useSelector(getDashboardTab)
+  const userInfo = useSelector(getUserInfo)
 
   const handleToggleDashboardTab = () => {
     dispatch(setActiveDashboardTab(true))
     dispatch(setActiveRequestTab(false));
     dispatch(setActiveAssetTab(false));
     dispatch(setActiveUserTab(false));
+    // console.log(isUserTabActive)
   }
 
   const handleToggleRequestTab = () => {
@@ -66,32 +70,36 @@ const MenuBar = () => {
       </div>
       {/* body */}
       <div className='justify-center'>
-        <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isDashboardTabActive && 'bg-blue-400 text-white')} onClick={handleToggleDashboardTab}>
+        {userInfo.role === 'manager' && <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isDashboardTabActive && 'bg-blue-400 text-white')} onClick={handleToggleDashboardTab}>
           <div className={classnames('mx-6 my-2', isActive && 'hover:text-blue-600')}>
             <HomeIcon />
           </div>
           <p className={classnames('mt-2 text-[12px] text-center', narrow && 'text-[16px]')}>Dashboard</p>
-        </div>
+        </div>}
         <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isAssetTabActive && 'bg-blue-400 text-white')} onClick={handleToggleAssetTab}>
           <div className={classnames('mx-6 my-2')}><AssetIcon /></div>
           <p className={classnames('mt-2 text-[12px] text-center', narrow && 'text-[16px]')}>Tài sản</p>
         </div>
-        <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isRequestTabActive && 'bg-blue-400 text-white')} onClick={handleToggleRequestTab}>
+        {userInfo.role === 'manager' && <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isRequestTabActive && 'bg-blue-400 text-white')} onClick={handleToggleRequestTab}>
           <div className={classnames('mx-6 my-2')}><ArrowIcon /></div>
           <p className={classnames('mt-2 text-[12px] text-center', narrow && 'text-[16px]')}>Yêu cầu</p>
-        </div>
-        <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isUserTabActive && 'bg-blue-400 text-white')} onClick={handleToggleUserTab}>
+        </div>}
+        {userInfo.role === 'admin' && <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isUserTabActive && 'bg-blue-400 text-white')} onClick={handleToggleUserTab}>
           <div className={classnames('mx-6 my-2')}><UserIcon /></div>
           <p className={classnames('mt-2 text-[12px] text-center', narrow && 'text-[16px]')}>Người dùng</p>
-        </div>
-        <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isActive && 'bg-blue-400 text-white')} onClick={() => setIsActive(true)}>
+        </div>}
+        {/* <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isActive && 'bg-blue-400 text-white')} onClick={() => setIsActive(true)}>
           <div className={classnames('mx-6 my-2')}><HomeIcon /></div>
           <p className={classnames('mt-2 text-[12px] text-center', narrow && 'text-[16px]')}>Bảo trì</p>
-        </div>
-        <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isActive && 'bg-blue-400 text-white')} onClick={() => setIsActive(true)}>
+        </div> */}
+        {userInfo.role === 'manager' && <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isActive && 'bg-blue-400 text-white')} onClick={() => setIsActive(true)}>
           <div className={classnames('mx-6 my-2')}><CartIcon /></div>
           <p className={classnames('mt-2 text-[12px] text-center', narrow && 'text-[16px]')}>Mua sắm</p>
-        </div>
+        </div>}
+        {userInfo.role === 'user' && <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isActive && 'bg-blue-400 text-white')} onClick={() => setIsActive(true)}>
+          <div className={classnames('mx-6 my-2')}><ClipboardIcon /></div>
+          <p className={classnames('mt-2 text-[12px] text-center', narrow && 'text-[16px]')}>Lịch sử mượn/trả</p>
+        </div>}
       </div>
     </div>
   );

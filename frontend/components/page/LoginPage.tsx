@@ -42,7 +42,7 @@ const LoginPage = () => {
       // Redirect based on user role
       switch (role) {
         case 'admin':
-          router.push('/admin/dashboard');
+          router.push('/admin');
           break;
         case 'manager':
           router.push('/manager');
@@ -56,6 +56,7 @@ const LoginPage = () => {
 
       // Show success toast
       toast.success('Login successful!');
+      localStorage.setItem("token", data.user.token)
     } catch (error) {
       // Show error toast
       toast.error('Invalid email or password. Please try again.');

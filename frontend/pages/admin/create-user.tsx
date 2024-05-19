@@ -7,10 +7,6 @@ import CreateAccountPage from '@/components/page/CreateAcc'
 
 const RemoveBackgroundPage = () => {
     //const router = useRouter()
-    //const { t: tSub } = useTranslationWithHTMLParser(TranslationFileKey.SubPage)
-    //const { t: tSchema } = useTranslationWithHTMLParser(
-    // TranslationFileKey.FAQSchema
-    //)
 
     return (
         <Layout

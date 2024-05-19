@@ -2,59 +2,40 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { routes } from "@/constant/routes";
 
 const ResetPage = () => {
-  const router = useRouter();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Create login credentials object
-    const credentials = {
-      email,
-      password
-    };
-
     try {
-      const response = await fetch('http://localhost:4000/users/login', {
+      const response = await fetch(`http://localhost:4000/users/forgot-password/${email}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(credentials)
+        }
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error('Failed to login');
+        throw new Error('Failed to send reset password email');
       }
 
-      // Redirect based on user role
-      const { role } = data.user;
-      switch (role) {
-        case 'admin':
-          router.push("/admin/dashboard");
-          break;
-        case 'manager':
-          router.push("/manager");
-          break;
-        case 'user':
-          router.push("/user");
-          break;
-        default:
-          router.push("/"); // Default redirection
-      }
-
-      // Show success toast
-      toast.success('Login successful!');
+      // Hiển thị thông báo thành công
+      toast.success('Reset password email sent successfully!', {
+        autoClose: 1000, // Đóng sau 2 giây
+        onClose: () => {
+          // Chuyển hướng người dùng đến trang đăng nhập hoặc trang khác nếu cần
+          router.push(routes.login);
+        }
+      });
     } catch (error) {
-      // Show error toast
-      toast.error('Invalid email or password. Please try again.');
+      // Hiển thị thông báo lỗi
+      toast.error('Failed to send reset password email. Please try again.');
     }
-  };
+  }
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
@@ -87,31 +68,15 @@ const ResetPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Enter your email"
+                placeholder="Nhập email của bạn"
               />
             </div>
-            {/* <div className="mb-6">
-              <label
-                htmlFor="password"
-                className="block text-gray-700 text-sm font-bold mb-2"
-              >
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="shadow appearance-none border border-red rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Enter your password"
-              />
-            </div> */}
             <div className="flex items-center justify-between">
               <button
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 type="submit"
               >
-                Send email
+                Gửi email
               </button>
             </div>
           </form>

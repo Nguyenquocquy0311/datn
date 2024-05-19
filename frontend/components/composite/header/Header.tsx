@@ -20,7 +20,7 @@ const Header = ({onClick, title}) => {
       <div className="px-2 tlg:px-6 flex items-center justify-between">
         {/* <Logo onClick={GoToHome} /> */}
         <div className="mx-4 text-blue-500 hover:text-blue-700" onClick={onClick}><CirclePlusIcon/></div>
-        <p className="text-[16px] font-semibold">{title}</p>
+        <p className="text-[20px] font-semibold">{title}</p>
         <SearchInput/>
         <UserMenu/>
       </div>

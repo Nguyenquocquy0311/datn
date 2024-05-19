@@ -5,7 +5,7 @@ import {
   userTabReducer,
   planTabReducer,
   userInfoReducer,
-  dashboardReducer
+  dashboardTabReducer
 } from './slices/redux';
 
 const store = configureStore({
@@ -14,7 +14,7 @@ const store = configureStore({
     assetTab: assetTabReducer,
     userTab: userTabReducer,
     planTab: planTabReducer,
-    dashboardTab: dashboardReducer,
+    dashboardTab: dashboardTabReducer,
     userInfo: userInfoReducer,
   },
 });

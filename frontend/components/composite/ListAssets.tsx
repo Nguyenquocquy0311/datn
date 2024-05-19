@@ -8,6 +8,8 @@ import { EyeIcon } from './common/icon/EyeIcon';
 import { EditIcon } from './common/icon/EditIcon';
 import { DeleteIcon } from './common/icon/DeleteIcon';
 import classnames from 'classnames';
+import { useSelector } from 'react-redux';
+import { getUserInfo } from '@/slices/redux';
 
 const ListAssets = () => {
   const [assets, setAssets] = useState([]);
@@ -27,7 +29,8 @@ const ListAssets = () => {
     price: "",
     condition: "",
     description: ""
-  });
+  })
+  const userInfo = useSelector(getUserInfo)
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -39,7 +42,6 @@ const ListAssets = () => {
   };
 
   const handleSaveAssetData = () => {
-    console.log("Asset data saved:", assetData);
     handleCloseModal();
   };
 
@@ -132,29 +134,29 @@ const ListAssets = () => {
       <table className="mx-auto border-collapse w-full">
         <thead>
           <tr className="bg-gray-100">
-            <th className="px-4 py-2">Số thứ tự</th>
-            <th className="px-4 py-2">Tên tài sản</th>
-            <th className="px-4 py-2">Số lượng</th>
-            <th className="px-4 py-2">Loại tài sản</th>
-            <th className="px-4 py-2">Nguyên giá</th>
-            <th className="px-4 py-2">Tình trạng</th>
-            <th className="px-4 py-2">Trạng thái</th>
-            <th className="px-4 py-2">Hành động</th>
+            <th className="px-4 py-4">Số thứ tự</th>
+            <th className="px-4 py-4">Tên tài sản</th>
+            <th className="px-4 py-4">Số lượng</th>
+            <th className="px-4 py-4">Loại tài sản</th>
+            <th className="px-4 py-4">Nguyên giá</th>
+            <th className="px-4 py-4">Tình trạng</th>
+            <th className="px-4 py-4">Trạng thái</th>
+            <th className="px-4 py-4">Hành động</th>
           </tr>
         </thead>
         <tbody className='text-center'>
           {items.map((asset, index) => (
             <tr key={asset._id}>
-              <td className="px-4 py-4 border-b border-gray-300">{index + 1}</td>
-              <td className="px-4 py-4 border-b border-gray-300">{asset.name}</td>
-              <td className="px-4 py-4 border-b border-gray-300">{asset.quantity}</td>
-              <td className="px-4 py-4 border-b border-gray-300">{asset.category}</td>
-              <td className="px-4 py-4 border-b border-gray-300">{asset.price.toLocaleString('vi-VN')} VNĐ</td>
-              <td className="px-4 py-4 border-b border-gray-300">{asset.condition}</td>
-              <td className="px-4 py-4 border-b border-gray-300">{asset.status === 'Unavailable' ? 'Đang được mượn' : 'Sẵn sàng'}</td>
-              <td className="px-4 py-2 border-b border-gray-300">
-                <button className={classnames('rounded-lg p-2', asset.status === 'Unavailable' ? 'bg-slate-300' : 'bg-blue-500 text-white hover:bg-blue-400')} onClick={() => handleOpenBorrowModal(asset)} disabled={asset.status === 'Unavailable'}>Mượn</button>
-                {/* <div className="flex items-center justify-center space-x-2">
+              <td className="px-4 py-3 border-b border-gray-300">{index + 1}</td>
+              <td className="px-4 py-3 border-b border-gray-300">{asset.name}</td>
+              <td className="px-4 py-3 border-b border-gray-300">{asset.quantity}</td>
+              <td className="px-4 py-3 border-b border-gray-300">{asset.category}</td>
+              <td className="px-4 py-3 border-b border-gray-300">{asset.price.toLocaleString('vi-VN')} VNĐ</td>
+              <td className="px-4 py-3 border-b border-gray-300">{asset.condition}</td>
+              <td className="px-4 py-3 border-b border-gray-300"><div className={classnames(asset.status === 'Unavailable' ? ' border-orange-400 text-orange-400': 'border-green-400 text-green-400', 'border-2 rounded-md')}>{asset.status === 'Unavailable' ? 'Đang được mượn' : 'Sẵn sàng'}</div></td>
+              <td className="px-4 py-3 border-b border-gray-300">
+                {userInfo.role === 'user' ? <button className={classnames('rounded-lg px-4 py-1', asset.status === 'Unavailable' ? 'bg-slate-300' : 'bg-blue-500 text-white hover:bg-blue-400')} onClick={() => handleOpenBorrowModal(asset)} disabled={asset.status === 'Unavailable'}>Mượn</button> :
+                <div className="flex items-center justify-center space-x-2">
                   <Tooltip content="Thông tin chi tiết" className='bg-slate-500 text-white p-2 rounded-lg'>
                     <span className="text-lg text-gray-500 cursor-pointer hover:text-slate-500">
                       <EyeIcon />
@@ -170,7 +172,7 @@ const ListAssets = () => {
                       <DeleteIcon />
                     </span>
                   </Tooltip>
-                </div> */}
+                </div>}
               </td>
             </tr>
           ))}

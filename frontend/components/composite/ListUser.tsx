@@ -1,29 +1,32 @@
 import { useState, useEffect, SetStateAction } from 'react';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Tooltip, getKeyValue } from "@nextui-org/react";
-import Modal from './Modal/ModalUser';
 import { EyeIcon } from './common/icon/EyeIcon';
 import { EditIcon } from './common/icon/EditIcon';
 import { DeleteIcon } from './common/icon/DeleteIcon';
+import ModalEditUser from './Modal/ModalEditUser';
+import ModalDetailUser from './Modal/ModalDetailUser';
 
 const ListUser = () => {
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(null); // Thêm state mới để lưu _id của người dùng được chọn
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalEditOpen, setIsModalEditOpen] = useState(false)
+  const [isModalDetailOpen, setIsModalDetailOpen] = useState(false)
   const [userData, setUserData] = useState({
     name: "",
     email: "",
     department: "",
     position: "",
     role: "user"
-  });
+  })
 
   const handleOpenModal = () => {
-    setIsModalOpen(true);
+    setIsModalEditOpen(true);
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    setIsModalEditOpen(false);
+    setIsModalDetailOpen(false)
     setSelectedUserId(null); // Reset selectedUserId khi đóng modal
   };
 
@@ -57,9 +60,18 @@ const ListUser = () => {
     if (selectedUser) {
       setUserData(selectedUser); // Cập nhật thông tin người dùng trong state userData
       setSelectedUserId(userId); // Lưu _id của người dùng được chọn
-      setIsModalOpen(true); // Mở modal để sửa thông tin người dùng
+      setIsModalEditOpen(true); // Mở modal để sửa thông tin người dùng
     }
-  };
+  }
+
+  const handleDetailUser = (userId) => {
+    // Tìm thông tin người dùng được chọn từ danh sách users
+    const selectedUser = users.find(user => user._id === userId);
+    if (selectedUser) {
+      setSelectedUserId(userId); // Lưu _id của người dùng được chọn
+      setIsModalDetailOpen(true); // Mở modal để sửa thông tin người dùng
+    }
+  }
 
   return (
     <div className='mx-auto bg-white mt-8 p-4 rounded-xl w-full h-full justify-center'>
@@ -89,7 +101,7 @@ const ListUser = () => {
               <td className="px-4 py-4 border-b border-gray-300">
                 <div className="flex items-center justify-center space-x-2">
                   <Tooltip content="Details"  className='bg-slate-500 text-white p-2 rounded-lg'>
-                    <span className="text-lg text-gray-500 cursor-pointer hover:text-blue-500">
+                    <span className="text-lg text-gray-500 cursor-pointer hover:text-blue-500" onClick={() => handleDetailUser(user._id)}>
                       <EyeIcon />
                     </span>
                   </Tooltip>
@@ -109,10 +121,15 @@ const ListUser = () => {
           ))}
         </tbody>
       </table>
-      <Modal
-        isOpen={isModalOpen}
+      <ModalEditUser
+        isOpen={isModalEditOpen}
         onClose={handleCloseModal}
         onSave={handleSaveUserData}
+        userData={userData}
+      />
+      <ModalDetailUser
+        isOpen={isModalDetailOpen}
+        onClose={handleCloseModal}
         userData={userData}
       />
     </div>
