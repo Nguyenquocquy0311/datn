@@ -1,13 +1,39 @@
 import React, { useState } from 'react';
 
 const ModalApprove = ({ isOpen, onClose, onSubmit, requestId }) => {
-  const [approverName, setApproverName] = useState('');
+  const [approver, setApprover] = useState('');
   const [approverEmail, setApproverEmail] = useState('');
   const [approvalDate, setApprovalDate] = useState(new Date());
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(requestId, approverName, approverEmail, approvalDate);
+
+    const approvalData = {
+      approver,
+      approverEmail,
+      // isApproved: true
+    };
+
+    try {
+      const response = await fetch(`http://localhost:4000/requests/${requestId}/approve`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(approvalData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const result = await response.json();
+      onSubmit(result); // You can pass the result to the parent component if needed
+      onClose(); // Close the modal after successful submission
+    } catch (error) {
+      console.error('There was a problem with the fetch operation:', error);
+      // Optionally handle the error
+    }
   };
 
   return (
@@ -27,8 +53,8 @@ const ModalApprove = ({ isOpen, onClose, onSubmit, requestId }) => {
                 <label className="block text-gray-700 text-sm font-bold mb-2">Tên Người Phê Duyệt:</label>
                 <input
                   type="text"
-                  value={approverName}
-                  onChange={(e) => setApproverName(e.target.value)}
+                  value={approver}
+                  onChange={(e) => setApprover(e.target.value)}
                   className="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500"
                   required
                 />
@@ -47,7 +73,7 @@ const ModalApprove = ({ isOpen, onClose, onSubmit, requestId }) => {
                 <label className="block text-gray-700 text-sm font-bold mb-2">Ngày Phê Duyệt:</label>
                 <input
                   type="date"
-                  value={approvalDate.toISOString().split('T')[0]} // Chuyển định dạng ngày về YYYY-MM-DD
+                  value={approvalDate.toISOString().split('T')[0]}
                   onChange={(e) => setApprovalDate(new Date(e.target.value))}
                   className="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500"
                   required

@@ -6,6 +6,7 @@ const initialRequestTabState = false;
 const initialAssetTabState = false;
 const initialUserTabState = false;
 const initialPlanTabState = false;
+const initialDashboardTabState = false;
 const initialUserInfoState = {
   email: '',
   role: '',
@@ -37,6 +38,14 @@ const userTabSlice = createSlice({
   },
 });
 
+const dashboardTabSlice = createSlice({
+  name: 'dashboardTab',
+  initialState: initialDashboardTabState,
+  reducers: {
+    setActive: (state, { payload }) => payload,
+  },
+});
+
 const planTabSlice = createSlice({
   name: 'planTab',
   initialState: initialPlanTabState,
@@ -47,7 +56,7 @@ const planTabSlice = createSlice({
 
 const userInfoSlice = createSlice({
   name: 'userInfo',
-  initialUserInfoState,
+  initialState: initialUserInfoState,  // Fix this line
   reducers: {
     setUserInfo: (state, { payload }) => {
       state.email = payload.email;
@@ -76,6 +85,10 @@ export const {
 } = userTabSlice.actions;
 
 export const {
+  setActive: setActiveDashboardTab,
+} = dashboardTabSlice.actions;
+
+export const {
   setActive: setActivePlanTab,
 } = planTabSlice.actions;
 
@@ -85,6 +98,7 @@ export const { setUserInfo, clearUserInfo } = userInfoSlice.actions;
 export const getRequestTab = (state) => state?.requestTab;
 export const getAssetTab = (state) => state?.assetTab;
 export const getUserTab = (state) => state?.userTab;
+export const getDashboardTab = (state) => state?.dashboardTab;
 export const getPlanTab = (state) => state?.planTab;
 export const getUserInfo = (state) => state?.userInfo;
 
@@ -96,5 +110,6 @@ export const getUserInfoName = createSelector(getUserInfo, (state) => state.name
 export const requestTabReducer = requestTabSlice.reducer;
 export const assetTabReducer = assetTabSlice.reducer;
 export const userTabReducer = userTabSlice.reducer;
+export const dashboardTabReducer = dashboardTabSlice.reducer;
 export const planTabReducer = planTabSlice.reducer;
 export default userInfoSlice.reducer;

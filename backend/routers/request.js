@@ -6,6 +6,7 @@ const Request = require('../models/Request');
 router.get('/requests', async (req, res) => {
     try {
         const requests = await Request.find();
+        
         res.json(requests);
     } catch (error) {
         console.error(error);

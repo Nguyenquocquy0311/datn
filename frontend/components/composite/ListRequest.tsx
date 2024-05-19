@@ -37,6 +37,9 @@ const ListRequests = () => {
     setSelectedRequest(null); // Reset thông tin của yêu cầu được chọn
   };
 
+   // Filter requests where isApproved is false
+  const filteredRequests = requests.filter(request => !request?.isApproved);
+
   return (
     <div className='mx-auto bg-white mt-8 p-4 rounded-xl w-full h-full justify-center'>
       <h2 className='mb-6'>Hiển thị tất cả {requests.length} bản ghi</h2>
@@ -54,7 +57,7 @@ const ListRequests = () => {
           </tr>
         </thead>
         <tbody className='text-center'>
-          {requests.map((request, index) => (
+          {filteredRequests.map((request, index) => (
             <tr key={request._id}>
               <td className="px-4 py-4 border-b border-gray-300">{index + 1}</td>
               <td className="px-4 py-4 border-b border-gray-300">{request.type}</td>

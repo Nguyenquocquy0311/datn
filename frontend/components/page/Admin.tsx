@@ -10,8 +10,9 @@ import ListRequests from '../composite/ListRequest'
 import SideBar from '../composite/common/Sidebar'
 import MenuBar from '../composite/common/Sidebar'
 import { useRouter } from 'next/router'
-import { getAssetTab, getRequestTab, getUserTab, setActiveUserTab } from '@/slices/redux'
+import { getAssetTab, getDashboardTab, getRequestTab, getUserTab, setActiveDashboardTab, setActiveUserTab } from '@/slices/redux'
 import { useDispatch, useSelector } from 'react-redux'
+import LineChart from '../composite/common/LineChart'
 
 export default function Admin() {
   const router = useRouter()
@@ -24,6 +25,7 @@ export default function Admin() {
   const isRequestTabActive = useSelector(getRequestTab)
   const isAssetTabActive = useSelector(getAssetTab)
   const isUserTabActive = useSelector(getUserTab)
+  const isDashboardTabActive = useSelector(getDashboardTab)
 
   useEffect(() => {
     dispatch(setActiveUserTab(true));
@@ -36,9 +38,10 @@ export default function Admin() {
         <MenuBar/>
         <div className='flex flex-col ml-24 w-full h-full'>
           <Header onClick={handleAddUser} title='Danh sách tài sản'/>
-        {isUserTabActive && <ListUser/> }
-        {isAssetTabActive && <ListAssets/>}
-        {isRequestTabActive && <ListRequests/>}
+          {isUserTabActive && <ListUser/> }
+          {isAssetTabActive && <ListAssets/>}
+          {isRequestTabActive && <ListRequests/>}
+          {!isDashboardTabActive && <LineChart />}
         </div>
       </div>
     </div>

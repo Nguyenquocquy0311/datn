@@ -15,6 +15,8 @@ import {
   getUserTab,
   setActiveAssetTab,
   setActiveUserTab,
+  setActiveDashboardTab,
+  getDashboardTab,
 } from '../../../slices/redux';
 
 const MenuBar = () => {
@@ -25,20 +27,31 @@ const MenuBar = () => {
   const isRequestTabActive = useSelector(getRequestTab)
   const isAssetTabActive = useSelector(getAssetTab)
   const isUserTabActive = useSelector(getUserTab)
+  const isDashboardTabActive = useSelector(getDashboardTab)
+
+  const handleToggleDashboardTab = () => {
+    dispatch(setActiveDashboardTab(true))
+    dispatch(setActiveRequestTab(false));
+    dispatch(setActiveAssetTab(false));
+    dispatch(setActiveUserTab(false));
+  }
 
   const handleToggleRequestTab = () => {
+    dispatch(setActiveDashboardTab(false))
     dispatch(setActiveRequestTab(true));
     dispatch(setActiveAssetTab(false));
     dispatch(setActiveUserTab(false));
   };
 
   const handleToggleAssetTab = () => {
+    dispatch(setActiveDashboardTab(false))
     dispatch(setActiveAssetTab(true));
     dispatch(setActiveUserTab(false));
     dispatch(setActiveRequestTab(false));
   };
 
   const handleToggleUserTab = () => {
+    dispatch(setActiveDashboardTab(false))
     dispatch(setActiveUserTab(true));
     dispatch(setActiveRequestTab(false));
     dispatch(setActiveAssetTab(false));
@@ -53,7 +66,7 @@ const MenuBar = () => {
       </div>
       {/* body */}
       <div className='justify-center'>
-        <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isActive && 'bg-blue-400 text-white')} onClick={() => setIsActive(true)}>
+        <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isDashboardTabActive && 'bg-blue-400 text-white')} onClick={handleToggleDashboardTab}>
           <div className={classnames('mx-6 my-2', isActive && 'hover:text-blue-600')}>
             <HomeIcon />
           </div>
