@@ -7,7 +7,7 @@ export default function SearchInput() {
         <div className="fixed right-20">
             <Input
                 classNames={{
-                    base: "w-60 h-8 pt-1 px-2 border rounded-md hover:border-1 justify-center",
+                    base: "w-60 h-8 pt-[2px] px-2 border rounded-md hover:border-1 justify-center",
                     input: "text-sm outline-none",
                 }}
                 placeholder="Search"

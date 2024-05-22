@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import { getUserInfo } from '@/slices/redux';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 
 const ModalApprove = ({ isOpen, onClose, onSubmit, requestId }) => {
-  const [approver, setApprover] = useState('');
-  const [approverEmail, setApproverEmail] = useState('');
+  const userInfo = useSelector(getUserInfo)
+  const [approver, setApprover] = useState(userInfo.name);
+  const [approverEmail, setApproverEmail] = useState(userInfo.email);
   const [approvalDate, setApprovalDate] = useState(new Date());
 
   const handleSubmit = async (e) => {
@@ -11,7 +15,6 @@ const ModalApprove = ({ isOpen, onClose, onSubmit, requestId }) => {
     const approvalData = {
       approver,
       approverEmail,
-      // isApproved: true
     };
 
     try {
@@ -29,7 +32,8 @@ const ModalApprove = ({ isOpen, onClose, onSubmit, requestId }) => {
 
       const result = await response.json();
       onSubmit(result); // You can pass the result to the parent component if needed
-      onClose(); // Close the modal after successful submission
+      toast.success('Đã phê duyệt thành công!');
+      onClose(); 
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
       // Optionally handle the error

@@ -18,6 +18,10 @@ import {
   setActiveDashboardTab,
   getDashboardTab,
   getUserInfo,
+  getPlanTab,
+  setActivePlanTab,
+  getHistoryReuqestTab,
+  setActiveHistoryReuqestTab,
 } from '../../../slices/redux';
 import { ClipboardIcon } from './icon/ClipboardIcon';
 
@@ -30,33 +34,60 @@ const MenuBar = () => {
   const isAssetTabActive = useSelector(getAssetTab)
   const isUserTabActive = useSelector(getUserTab)
   const isDashboardTabActive = useSelector(getDashboardTab)
+  const isPlanTabActive = useSelector(getPlanTab)
+  const isHistoryRequestTabActive = useSelector(getHistoryReuqestTab)
   const userInfo = useSelector(getUserInfo)
 
   const handleToggleDashboardTab = () => {
+    dispatch(setActivePlanTab(false))
     dispatch(setActiveDashboardTab(true))
     dispatch(setActiveRequestTab(false));
     dispatch(setActiveAssetTab(false));
     dispatch(setActiveUserTab(false));
-    // console.log(isUserTabActive)
+    dispatch(setActiveHistoryReuqestTab(false))
   }
 
   const handleToggleRequestTab = () => {
+    dispatch(setActivePlanTab(false))
     dispatch(setActiveDashboardTab(false))
     dispatch(setActiveRequestTab(true));
     dispatch(setActiveAssetTab(false));
     dispatch(setActiveUserTab(false));
+    dispatch(setActiveHistoryReuqestTab(false))
   };
 
   const handleToggleAssetTab = () => {
+    dispatch(setActivePlanTab(false))
     dispatch(setActiveDashboardTab(false))
     dispatch(setActiveAssetTab(true));
     dispatch(setActiveUserTab(false));
     dispatch(setActiveRequestTab(false));
+    dispatch(setActiveHistoryReuqestTab(false))
   };
 
   const handleToggleUserTab = () => {
+    dispatch(setActivePlanTab(false))
     dispatch(setActiveDashboardTab(false))
     dispatch(setActiveUserTab(true));
+    dispatch(setActiveRequestTab(false));
+    dispatch(setActiveAssetTab(false));
+    dispatch(setActiveHistoryReuqestTab(false))
+  };
+
+  const handleTogglePlanTab = () => {
+    dispatch(setActivePlanTab(true))
+    dispatch(setActiveDashboardTab(false))
+    dispatch(setActiveUserTab(false));
+    dispatch(setActiveRequestTab(false));
+    dispatch(setActiveAssetTab(false));
+    dispatch(setActiveHistoryReuqestTab(false))
+  };
+
+  const handleToggleHistoryTab = () => {
+    dispatch(setActiveHistoryReuqestTab(true))
+    dispatch(setActivePlanTab(false))
+    dispatch(setActiveDashboardTab(false))
+    dispatch(setActiveUserTab(false));
     dispatch(setActiveRequestTab(false));
     dispatch(setActiveAssetTab(false));
   };
@@ -70,7 +101,7 @@ const MenuBar = () => {
       </div>
       {/* body */}
       <div className='justify-center'>
-        {userInfo.role === 'manager' && <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isDashboardTabActive && 'bg-blue-400 text-white')} onClick={handleToggleDashboardTab}>
+        {userInfo.role !== 'user' && <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isDashboardTabActive && 'bg-blue-400 text-white')} onClick={handleToggleDashboardTab}>
           <div className={classnames('mx-6 my-2', isActive && 'hover:text-blue-600')}>
             <HomeIcon />
           </div>
@@ -92,11 +123,11 @@ const MenuBar = () => {
           <div className={classnames('mx-6 my-2')}><HomeIcon /></div>
           <p className={classnames('mt-2 text-[12px] text-center', narrow && 'text-[16px]')}>Bảo trì</p>
         </div> */}
-        {userInfo.role === 'manager' && <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isActive && 'bg-blue-400 text-white')} onClick={() => setIsActive(true)}>
+        {userInfo.role === 'manager' && <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isPlanTabActive && 'bg-blue-400 text-white')} onClick={handleTogglePlanTab}>
           <div className={classnames('mx-6 my-2')}><CartIcon /></div>
           <p className={classnames('mt-2 text-[12px] text-center', narrow && 'text-[16px]')}>Mua sắm</p>
         </div>}
-        {userInfo.role === 'user' && <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isActive && 'bg-blue-400 text-white')} onClick={() => setIsActive(true)}>
+        {userInfo.role === 'user' && <div className={classnames('my-4 py-1 hover:bg-blue-400 hover:text-white cursor-pointer rounded-lg', narrow && 'flex',  isHistoryRequestTabActive && 'bg-blue-400 text-white')} onClick={handleToggleHistoryTab}>
           <div className={classnames('mx-6 my-2')}><ClipboardIcon /></div>
           <p className={classnames('mt-2 text-[12px] text-center', narrow && 'text-[16px]')}>Lịch sử mượn/trả</p>
         </div>}

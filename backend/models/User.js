@@ -66,7 +66,7 @@ userSchema.methods.generateAuthToken = async function(ipAddress) {
     const user = this
     const token = jwt.sign({_id: user._id}, process.env.JWT_SECRET)
     user.tokens = user.tokens.concat({token})
-    user.loginHistory = user.loginHistory.concat({timestamp: Date.now(), ipAddress})
+    user.loginHistory = user.loginHistory.concat({timestamp: Date.now()})
     await user.save()
     return token
 }
@@ -83,6 +83,12 @@ userSchema.statics.findByCredentials = async (email, password) => {
     }
     return user
 }
+
+userSchema.methods.logout = async function(token) {
+    const user = this;
+    user.tokens = user.tokens.filter((t) => t.token !== token);
+    await user.save();
+};
 
 const User = mongoose.model('User', userSchema)
 

@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { setUserInfo } from '@/slices/redux';
+import { getUserInfo, setActiveLoggedIn, setUserInfo } from '@/slices/redux';
 
 const LoginPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const userInfo = useSelector(getUserInfo)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,8 +37,10 @@ const LoginPage = () => {
       }
 
       // Dispatch user info to Redux store
-      const { email, role, name } = data.user;
-      dispatch(setUserInfo({ email, role, name }));
+      const { email, role, name, _id, password, department, position } = data.user;
+      dispatch(setUserInfo({ email, role, name, _id, password, department, position }));
+      localStorage.setItem('authToken', data.token);
+      dispatch(setActiveLoggedIn(true))
 
       // Redirect based on user role
       switch (role) {

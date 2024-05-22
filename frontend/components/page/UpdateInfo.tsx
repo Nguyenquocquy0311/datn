@@ -1,34 +1,43 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { getUserInfo } from "@/slices/redux";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { getUserInfo, setUserInfo } from "@/slices/redux";
 
 const UpdateInfoPage = () => {
     const router = useRouter();
-    const [name, setName] = useState("")
-    const [email, setEmail] = useState("")
-    const [department, setDepartment] = useState("")
-    const [position, setPosition] = useState("")
-    const [password, setPassword] = useState("")
-    const [role, setRole] = useState("user")
-    const [error, setError] = useState("")
+    const userInfo = useSelector(getUserInfo);
+    const dispatch = useDispatch();
 
-    const userInfo = useSelector(getUserInfo)
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [department, setDepartment] = useState("");
+    const [position, setPosition] = useState("");
+    const [password, setPassword] = useState("");
+    const [role, setRole] = useState("user");
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        setName(userInfo.name || "");
+        setEmail(userInfo.email || "");
+        setDepartment(userInfo.department || "");
+        setPosition(userInfo.position || "");
+        setRole(userInfo.role || "user");
+    }, [userInfo]);
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
-        // Create user object
-        const updatedUser = {
-            name,
-            email,
-            department,
-            position,
-            password,
-            role
-        }
+        // Create updated user object
+        const updatedUser = {};
+
+        if (name !== userInfo.name) updatedUser.name = name;
+        if (email !== userInfo.email) updatedUser.email = email;
+        if (department !== userInfo.department) updatedUser.department = department;
+        if (position !== userInfo.position) updatedUser.position = position;
+        if (password) updatedUser.password = password;
+        if (role !== userInfo.role) updatedUser.role = role;
 
         try {
             const response = await fetch(`http://localhost:4000/users/${userInfo._id}`, {
@@ -37,24 +46,32 @@ const UpdateInfoPage = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(updatedUser)
-            })
+            });
+            console.log(updatedUser);
 
             if (!response.ok) {
-                throw new Error('Failed to update user')
+                if (response.status === 400) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to update user');
+                }
+                throw new Error('Failed to update user');
             }
+
+            // Dispatch action to update Redux store
+            dispatch(setUserInfo({ ...userInfo, ...updatedUser }));
 
             // Show success toast
             toast.success('User updated successfully!', {
-                autoClose: 2000, 
+                autoClose: 500,
                 onClose: () => {
                     router.push("/user");
                 }
-            })
+            });
         } catch (error) {
-            // Hiển thị toast thông báo lỗi
-            toast.error('Failed to update user. Please try again.');
+            // Show error toast
+            toast.error(`Error: ${error.message}`);
         }
-    }
+    };
 
     return (
         <div className="flex justify-center items-center h-screen bg-gray-100">
@@ -76,11 +93,10 @@ const UpdateInfoPage = () => {
                         <input
                             type="text"
                             id="name"
-                            value={userInfo.name}
-                            // onChange={(e) => setName(e.target.value)}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             placeholder="Nhập họ tên của bạn"
-                            disabled
                         />
                     </div>
                     <div className="mb-4">
@@ -141,10 +157,10 @@ const UpdateInfoPage = () => {
                         <input
                             type="password"
                             id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            value='123456'
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             placeholder="Enter your password"
+                            required
                         />
                     </div>
                     <div className="mb-4">
@@ -157,8 +173,8 @@ const UpdateInfoPage = () => {
                         <input
                             id="role"
                             value={role}
-                            //   onChange={(e) => setRole(e.target.value)}
                             className="border rounded w-full py-2 px-3 text-gray-700 focus:outline-none"
+                            readOnly
                         />
                     </div>
                     <div className="flex items-center justify-center">
@@ -175,4 +191,4 @@ const UpdateInfoPage = () => {
     );
 };
 
-export default UpdateInfoPage
+export default UpdateInfoPage;

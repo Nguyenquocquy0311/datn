@@ -1,18 +1,36 @@
-import React, { useState } from "react";
-import { EyeIcon } from "../common/icon/EyeIcon";
-import { EyeSlashIcon } from "../common/icon/EyeSlashIcon";
+import React, { useState, useEffect } from "react";
+import { EyeIcon } from "../../common/icon/EyeIcon";
+import { EyeSlashIcon } from "../../common/icon/EyeSlashIcon";
 
-const ModalEditUser = ({ isOpen, onClose, onSave, userData }) => {
-  const [isShowPass, setIsShowPass] = useState(false);
+const ModalDetailUser = ({ isOpen, onClose, userId }) => {
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+    department: "",
+    position: "",
+    role: ""
+  });
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(`http://localhost:4000/users/${userId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+        const userData = await response.json();
+        setUserData(userData);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, [userId]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave();
     onClose();
-  };
-
-  const handleIsShowPass = () => {
-    setIsShowPass(!isShowPass);
   };
 
   return (
@@ -26,7 +44,7 @@ const ModalEditUser = ({ isOpen, onClose, onSave, userData }) => {
             >
               &times;
             </button>
-            <h2 className="text-2xl font-bold mb-4 text-center">Update User Information</h2>
+            <h2 className="text-2xl font-bold mb-4 text-center">Thông tin chi tiết người dùng</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
@@ -98,34 +116,6 @@ const ModalEditUser = ({ isOpen, onClose, onSave, userData }) => {
                   required
                 />
               </div>
-              <div className="mb-4 relative">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-                  Password:
-                </label>
-                <input
-                  type={isShowPass ? 'text' : 'password'}
-                  id="password"
-                  name="password"
-                  value={userData.password}
-                  onChange={() => {}}
-                  className="w-full px-3 py-2 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500"
-                  required
-                />
-                <div
-                  onClick={handleIsShowPass}
-                  className="absolute inset-y-0 right-0 pr-3 mt-5 flex items-center text-gray-700 cursor-pointer"
-                >
-                  {isShowPass ? <EyeIcon /> : <EyeSlashIcon />}
-                </div>
-              </div>
-              <div className="text-center">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
-                >
-                  Save
-                </button>
-              </div>
             </form>
           </div>
         </div>
@@ -134,4 +124,4 @@ const ModalEditUser = ({ isOpen, onClose, onSave, userData }) => {
   );
 };
 
-export default ModalEditUser
+export default ModalDetailUser;

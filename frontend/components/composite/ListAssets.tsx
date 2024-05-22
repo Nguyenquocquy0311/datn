@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import ModalAsset from './Modal/ModalAsset';
-import ModalDelete from './Modal/ModalDelete';
-import ModalBorrow from './Modal/ModalBorrow';
+import ModalUpdateAsset from './Modal/asset/ModalUpdateAsset';
+import ModalDelete from './Modal/asset/ModalDelete';
+import ModalBorrow from './Modal/request/ModalBorrow';
 import { Button, Pagination, Tooltip } from '@nextui-org/react';
 import React from 'react';
 import { EyeIcon } from './common/icon/EyeIcon';
@@ -10,11 +10,16 @@ import { DeleteIcon } from './common/icon/DeleteIcon';
 import classnames from 'classnames';
 import { useSelector } from 'react-redux';
 import { getUserInfo } from '@/slices/redux';
+import ModalAddAsset from './Modal/asset/ModalAddAsset';
+import ModalDetailAsset from './Modal/asset/ModalDetail';
 
 const ListAssets = () => {
   const [assets, setAssets] = useState([]);
+  const [assetInfo, setAssetInfo] = useState()
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedAssetId, setSelectedAssetId] = useState(null);
   const [isBorrowModalOpen, setIsBorrowModalOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
@@ -32,19 +37,18 @@ const ListAssets = () => {
   })
   const userInfo = useSelector(getUserInfo)
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedAssetId(null);
+    setIsDetailModalOpen(false)
+    setIsEditModalOpen(false)
   };
 
   const handleSaveAssetData = () => {
     handleCloseModal();
   };
 
+  // lấy danh sách tài sản
   useEffect(() => {
     const fetchAssets = async () => {
       try {
@@ -59,21 +63,22 @@ const ListAssets = () => {
       }
     };
 
-    fetchAssets();
+    fetchAssets()
   }, []);
 
   const handleEditAsset = (assetId) => {
-    const selectedAsset = assets.find(asset => asset._id === assetId);
-    if (selectedAsset) {
-      setAssetData(selectedAsset);
-      setSelectedAssetId(assetId);
-      setIsModalOpen(true);
-    }
+    setSelectedAssetId(assetId);
+    setIsEditModalOpen(true);
   };
 
   const handleOpenDeleteModal = (assetId) => {
     setSelectedAssetId(assetId);
     setIsDeleteModalOpen(true);
+  };
+
+  const handleOpenDetailModal = (assetId) => {
+    setSelectedAssetId(assetId);
+    setIsDetailModalOpen(true);
   };
 
   const handleCloseDeleteModal = () => {
@@ -82,7 +87,6 @@ const ListAssets = () => {
   };
 
   const handleDeleteAsset = () => {
-    console.log("Deleted asset with ID:", selectedAssetId);
     handleCloseDeleteModal();
   };
 
@@ -115,7 +119,7 @@ const ListAssets = () => {
   }, [page, assets]);
 
   return (
-    <div className='mx-auto bg-white mt-5 p-4 rounded-xl w-full h-full justify-center'>
+    <div className='mx-auto bg-white mt-5 p-4 rounded-xl w-full h-[89vh] justify-center'>
       <div className='flex'>
         <h2 className='mb-6'>Hiển thị {rowsPerPage} trên tổng cộng {assets.length} bản ghi</h2>
         <div className="fixed right-4">
@@ -127,7 +131,6 @@ const ListAssets = () => {
             initialPage={page}
             total={pages}
             onChange={(page) => setPage(page)}
-            // className='border border-divider w-8 h-8'
           />
         </div>
       </div>
@@ -147,7 +150,7 @@ const ListAssets = () => {
         <tbody className='text-center'>
           {items.map((asset, index) => (
             <tr key={asset._id}>
-              <td className="px-4 py-3 border-b border-gray-300">{index + 1}</td>
+              <td className="px-4 py-3 border-b border-gray-300">{(page - 1) * rowsPerPage + index + 1}</td>
               <td className="px-4 py-3 border-b border-gray-300">{asset.name}</td>
               <td className="px-4 py-3 border-b border-gray-300">{asset.quantity}</td>
               <td className="px-4 py-3 border-b border-gray-300">{asset.category}</td>
@@ -158,7 +161,7 @@ const ListAssets = () => {
                 {userInfo.role === 'user' ? <button className={classnames('rounded-lg px-4 py-1', asset.status === 'Unavailable' ? 'bg-slate-300' : 'bg-blue-500 text-white hover:bg-blue-400')} onClick={() => handleOpenBorrowModal(asset)} disabled={asset.status === 'Unavailable'}>Mượn</button> :
                 <div className="flex items-center justify-center space-x-2">
                   <Tooltip content="Thông tin chi tiết" className='bg-slate-500 text-white p-2 rounded-lg'>
-                    <span className="text-lg text-gray-500 cursor-pointer hover:text-slate-500">
+                    <span className="text-lg text-gray-500 cursor-pointer hover:text-slate-500" onClick={() => handleOpenDetailModal(asset._id)}>
                       <EyeIcon />
                     </span>
                   </Tooltip>
@@ -178,25 +181,32 @@ const ListAssets = () => {
           ))}
         </tbody>
       </table>
-      <ModalAsset
-        isOpen={isModalOpen}
+      <ModalUpdateAsset
+        isOpen={isEditModalOpen}
         onClose={handleCloseModal}
         onSave={handleSaveAssetData}
-        assetData={assetData}
+        assetId={selectedAssetId}
+      />
+      <ModalAddAsset
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
+      <ModalDetailAsset
+        isOpen={isDetailModalOpen}
+        onClose={handleCloseModal}
+        assetId={selectedAssetId}
       />
       <ModalDelete
         isOpen={isDeleteModalOpen}
         onClose={handleCloseDeleteModal}
         onSave={handleDeleteAsset}
-        assetData={{}}
+        assetId={selectedAssetId}
       />
       <ModalBorrow
         isOpen={isBorrowModalOpen}
         onClose={handleCloseBorrowModal}
-        onSubmit={handleBorrowAsset}
         assetId={selectedAsset ? selectedAsset._id : null}
         assetName={selectedAsset ? selectedAsset.name : null}
-        assetCategory={selectedAsset ? selectedAsset.category : null}
       />
     </div>
   );

@@ -1,6 +1,9 @@
 import dynamic from 'next/dynamic';
 import 'chart.js/auto';
 import { useEffect, useState } from 'react';
+import jsPDF from 'jspdf';
+import { saveAs } from 'file-saver';
+import { Document, Packer, Paragraph, TextRun, ImageRun } from 'docx';
 
 const Bar = dynamic(() => import('react-chartjs-2').then((mod) => mod.Bar), {
   ssr: false,
@@ -10,6 +13,7 @@ const LineChart = () => {
   const [requests, setRequests] = useState([]);
   const [assets, setAssets] = useState([]);
   const [selectedAsset, setSelectedAsset] = useState('');
+  const [fileFormat, setFileFormat] = useState('pdf');
 
   const fetchRequests = async () => {
     try {
@@ -44,6 +48,18 @@ const LineChart = () => {
 
   const handleAssetChange = (event) => {
     setSelectedAsset(event.target.value);
+  };
+
+  const handleFileFormatChange = (event) => {
+    setFileFormat(event.target.value);
+  };
+
+  const handleExport = () => {
+    if (fileFormat === 'pdf') {
+      exportPDF();
+    } else if (fileFormat === 'word') {
+      exportWord();
+    }
   };
 
   const filteredRequests = requests.filter(
@@ -102,23 +118,73 @@ const LineChart = () => {
     },
   };
 
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    doc.text('Number of times borrowed and returned ' + (selectedAsset || 'all assets'), 10, 10);
+    doc.addImage(document.getElementById('chart').toDataURL(), 'JPEG', 10, 20, 180, 150);
+    doc.save('report.pdf');
+  };
+
+  const exportWord = async () => {
+    const doc = new Document();
+    const chartImage = document.getElementById('chart').toDataURL();
+    const imageBuffer = await fetch(chartImage).then(res => res.arrayBuffer());
+
+    doc.addSection({
+      children: [
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: 'Số lượt mượn/trả ' + (selectedAsset || 'Tất cả tài sản'),
+              bold: true,
+              size: 24,
+            }),
+          ],
+        }),
+        new Paragraph({
+          children: [
+            new ImageRun({
+              data: imageBuffer,
+              transformation: {
+                width: 600,
+                height: 300,
+              },
+            }),
+          ],
+        }),
+      ],
+    });
+
+    Packer.toBlob(doc).then((blob) => {
+      saveAs(blob, 'report.docx');
+    });
+  };
+
   return (
-    <div className='bg-white mt-8 p-8 rounded-xl w-full h-[85vh]'>
-      <div className='flex'>
-        <p className='text-[20px]'>Số lượt mượn/trả {selectedAsset}</p>
-        <div className='fixed right-10'>
-          <label htmlFor="asset-select" className='text-blue-500 text-[16px]'>Chọn tài sản</label>
-          <select id="asset-select" value={selectedAsset} onChange={handleAssetChange} className='mx-4 border border-blue-500 text-neutral-400 p-1 rounded-md'>
+    <div className='bg-white mt-5 px-8 pt-4 rounded-xl w-full h-[89vh]'>
+      <div className='flex justify-between items-center mb-4'>
+        <div>
+          <p className='text-[20px]'>Số lượt mượn, trả {selectedAsset && 'của ' + selectedAsset}</p>
+        </div>
+        <div className='flex items-center'>
+          <label htmlFor="asset-select" className='text-[16px]'>Chọn tài sản:</label>
+          <select id="asset-select" value={selectedAsset} onChange={handleAssetChange} className='mx-4 border text-neutral-400 p-1 rounded-md'>
             <option value="">Tất cả tài sản</option>
             {assets.map((asset) => (
-              <option key={asset.id} value={asset.id}>
+              <option key={asset.id} value={asset.name}>
                 {asset.name}
               </option>
             ))}
           </select>
+          <label htmlFor="file-format-select" className=' text-[16px]'>Định dạng file:</label>
+          <select id="file-format-select" value={fileFormat} onChange={handleFileFormatChange} className='mx-4 border text-neutral-400 p-1 rounded-md'>
+            <option value="pdf">PDF</option>
+            <option value="word">Word</option>
+          </select>
+          <button onClick={handleExport} className='bg-blue-500 hover:bg-blue-400 text-white py-1 px-2 rounded-md'>Xuất báo cáo</button>
         </div>
       </div>
-      <Bar data={data} options={options} />
+      <Bar id="chart" data={data} options={options} />
     </div>
   );
 };

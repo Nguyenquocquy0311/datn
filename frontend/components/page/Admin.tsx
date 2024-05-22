@@ -5,15 +5,16 @@ import CreateAccountPage from './CreateAcc'
 import ListUser from '../composite/ListUser'
 import ListAssets from '../composite/ListAssets'
 import {useState} from "react";
-import ModalUser from '../composite/Modal/ModalEditUser'
+import ModalUser from '../composite/Modal/user/ModalEditUser'
 import ListRequests from '../composite/ListRequest'
 import SideBar from '../composite/common/Sidebar'
 import MenuBar from '../composite/common/Sidebar'
 import { useRouter } from 'next/router'
-import { getAssetTab, getDashboardTab, getRequestTab, getUserTab, setActiveDashboardTab, setActiveUserTab } from '@/slices/redux'
+import { getAssetTab, getDashboardTab, getPlanTab, getRequestTab, getUserTab, setActiveAssetTab, setActiveDashboardTab, setActiveUserTab } from '@/slices/redux'
 import { useDispatch, useSelector } from 'react-redux'
 import LineChart from '../composite/common/LineChart'
 import { routes } from '@/constant/routes'
+import { ShoppingPlan } from '../composite/ShoppingPlan'
 
 export default function Admin() {
   const router = useRouter()
@@ -23,10 +24,15 @@ export default function Admin() {
       router.push(routes.createUser)
     }
   }
+
+  const handleAddAsset = () => {
+    console.log('add asset')
+  }
   const isRequestTabActive = useSelector(getRequestTab)
   const isAssetTabActive = useSelector(getAssetTab)
   const isUserTabActive = useSelector(getUserTab)
   const isDashboardTabActive = useSelector(getDashboardTab)
+  const isPlanTabActive = useSelector(getPlanTab)
 
   let title = 'Dashboard'
   if (isUserTabActive) title = 'Danh sách người dùng';
@@ -36,6 +42,8 @@ export default function Admin() {
 
   useEffect(() => {
     dispatch(setActiveDashboardTab(true));
+    dispatch(setActiveUserTab(false));
+    dispatch(setActiveAssetTab(false));
   },[])
   
   return (

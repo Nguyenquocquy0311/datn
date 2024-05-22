@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { routes } from "@/constant/routes";
 
 const CreateAccountPage = () => {
   const router = useRouter();
@@ -41,10 +42,10 @@ const CreateAccountPage = () => {
 
       // Show success toast
       toast.success('User created successfully!', {
-        autoClose: 2000, // Close after 2 seconds
+        autoClose: 500, // Close after 2 seconds
         onClose: () => {
           // Redirect to login page after successful account creation
-          router.push("/login");
+          router.push(routes.admin);
         }
       });
     } catch (error) {

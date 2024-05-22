@@ -1,14 +1,17 @@
 import { useState, useEffect, SetStateAction } from 'react';
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Tooltip, getKeyValue } from "@nextui-org/react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Tooltip, getKeyValue, Pagination } from "@nextui-org/react";
 import { EyeIcon } from './common/icon/EyeIcon';
 import { EditIcon } from './common/icon/EditIcon';
 import { DeleteIcon } from './common/icon/DeleteIcon';
-import ModalEditUser from './Modal/ModalEditUser';
-import ModalDetailUser from './Modal/ModalDetailUser';
+import ModalEditUser from './Modal/user/ModalEditUser';
+import ModalDetailUser from './Modal/user/ModalDetailUser';
+import React from 'react';
+import ModalDelete from './Modal/user/ModalDelete';
 
 const ListUser = () => {
   const [users, setUsers] = useState([]);
-  const [selectedUserId, setSelectedUserId] = useState(null); // Thêm state mới để lưu _id của người dùng được chọn
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const [isModalEditOpen, setIsModalEditOpen] = useState(false)
   const [isModalDetailOpen, setIsModalDetailOpen] = useState(false)
@@ -65,17 +68,42 @@ const ListUser = () => {
   }
 
   const handleDetailUser = (userId) => {
-    // Tìm thông tin người dùng được chọn từ danh sách users
-    const selectedUser = users.find(user => user._id === userId);
-    if (selectedUser) {
-      setSelectedUserId(userId); // Lưu _id của người dùng được chọn
-      setIsModalDetailOpen(true); // Mở modal để sửa thông tin người dùng
-    }
+    setSelectedUserId(userId);
+    setIsModalDetailOpen(true); 
   }
 
+  const handleOpenDeleteModal = (userId) => {
+    setSelectedUserId(userId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setSelectedUserId(null);
+    setIsDeleteModalOpen(false);
+  };
+
+  // Logic for pagination
+  const [page, setPage] = React.useState(1);
+  const rowsPerPage = 10;
+
+  const pages = Math.ceil(users.length / rowsPerPage);
+  const currentItems = users.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+
+
   return (
-    <div className='mx-auto bg-white mt-8 p-4 rounded-xl w-full h-full justify-center'>
-      <div className='mb-5'><h2>Có tất cả {users.length - users.length} bản ghi</h2></div>
+    <div className='mx-auto bg-white mt-8 p-4 rounded-xl w-full h-[85vh] justify-center'>
+      <div className='flex justify-between items-center mb-4'>
+        <h2>Có tất cả {users.length} bản ghi</h2>
+
+        <Pagination
+          showControls
+          size='lg'
+          color="secondary"
+          total={pages}
+          initialPage={page}
+          onChange={(page) => setPage(page)}
+        />
+      </div>
       {/*<button className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-600 right-2 fixed" onClick={handleOpenModal}>Add User</button></div> */}
       <table className="mx-auto border-collapse w-full">
         <thead>
@@ -90,9 +118,9 @@ const ListUser = () => {
           </tr>
         </thead>
         <tbody className='text-center'>
-          {users.map((user, index) => (
+          {currentItems.map((user, index) => (
             <tr key={user._id}>
-              <td className="px-4 py-4 border-b border-gray-300">{index + 1}</td>
+              <td className="px-4 py-4 border-b border-gray-300">{(page - 1) * rowsPerPage + index + 1}</td>
               <td className="px-4 py-4 border-b border-gray-300">{user.name}</td>
               <td className="px-4 py-4 border-b border-gray-300">{user.email}</td>
               <td className="px-4 py-4 border-b border-gray-300">{user.department}</td>
@@ -111,7 +139,7 @@ const ListUser = () => {
                     </span>
                   </Tooltip>
                   <Tooltip color="danger" content="Delete user" className='bg-red-500 text-white p-2 rounded-lg'>
-                    <span className="text-lg text-gray-500 cursor-pointer hover:text-red-500" onClick={() => handleEditUser(user._id)}>
+                    <span className="text-lg text-gray-500 cursor-pointer hover:text-red-500" onClick={() => handleOpenDeleteModal(user._id)}>
                       <DeleteIcon />
                     </span>
                   </Tooltip>
@@ -130,7 +158,13 @@ const ListUser = () => {
       <ModalDetailUser
         isOpen={isModalDetailOpen}
         onClose={handleCloseModal}
-        userData={userData}
+        userId={selectedUserId}
+      />
+      <ModalDelete
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onSave={handleCloseDeleteModal}
+        userId={selectedUserId}
       />
     </div>
   );

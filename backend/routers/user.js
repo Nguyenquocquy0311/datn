@@ -15,14 +15,13 @@ router.get('/users', async (req, res) => {
     }
 })
 
-// Route to get login history of a specific user
+// xem lịch sử đăng nhập
 router.get('/users/:_id/login-history', async (req, res) => {
     try {
         const userId = req.params._id
 
         // Find the user by their _id
         const user = await User.findById(userId)
-        console.log(user.loginHistory)
         if (!user) {
             return res.status(404).send({ error: 'User not found' })
         }
@@ -77,56 +76,93 @@ router.post('/users/login', async (req, res) => {
     }
 })
 
-// Sửa thông tin người dùng
-router.put('/users/:_id', auth, async (req, res) => {
-    const updates = Object.keys(req.body)
-    const allowedUpdates = ['name', 'email', 'department', 'position', 'password', 'role']
-    const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
+// sửa thông tin user
+router.put('/users/:id', async (req, res) => {
+    const updates = Object.keys(req.body);
+    const allowedUpdates = ['name', 'email', 'department', 'position', 'password', 'role'];
+    const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
 
     if (!isValidOperation) {
-        return res.status(400).send({ error: 'Invalid updates!' })
+        return res.status(400).send({ error: 'Invalid updates!' });
     }
 
     try {
-        const user = await User.findById(req.params.id)
+        const user = await User.findById(req.params.id);
         if (!user) {
-            return res.status(404).send({ error: 'User not found' })
+            return res.status(404).send({ error: 'User not found' });
         }
 
-        updates.forEach((update) => user[update] = req.body[update])
-        await user.save()
-        res.send(user)
-    } catch (error) {
-        res.status(400).send(error)
-    }
-})
+        if (req.body.email) {
+            const existingUser = await User.findOne({ email: req.body.email });
+            if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+                return res.status(400).send({ error: 'Email already in use' });
+            }
+        }
 
-// lịch sử mượn/trả
-router.get('/users/:email/history-requests', async (req, res) => {
+        updates.forEach((update) => {
+            if (update === 'password') {
+                user[update] = bcrypt.hashSync(req.body[update], 8);
+            } else {
+                user[update] = req.body[update];
+            }
+        });
+        
+        await user.save();
+        res.send(user);
+    } catch (error) {
+        res.status(400).send(error);
+    }
+});
+
+// Route để xóa một user
+router.delete('/users/:id', getUser, async (req, res) => {
     try {
-        const email = req.params.email
-
-        // Find the user by email
-        const user = await User.findOne({ email })
-        if (!user) {
-            return res.status(404).send({ error: 'User not found' })
-        }
-
-        // Find approved requests for the user
-        const approvedRequests = await Request.find({ borrowerEmail: email, isApproved: true })
-
-        res.send(approvedRequests)
+        await res.user.remove;
+        await User.findByIdAndDelete(req.params.id);
+        res.json({ message: 'User deleted' });
     } catch (error) {
-        res.status(500).send({ error: 'Internal server error' })
+        res.status(500).json({ message: error.message });
     }
-})
+});
 
-router.get('/users/me', auth, async(req, res) => {
+// Route để lấy chi tiết một user bằng ID
+router.get('/users/:id', getUser, (req, res) => {
+    res.json(res.user);
+});
+
+// Route để xóa một user
+router.delete('/users/:id', getUser, async (req, res) => {
+    try {
+        await res.user.remove();
+        res.json({ message: 'User deleted' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Route để xem lịch sử mượn/trả của một người dùng bằng email
+router.get('/users/history-requests/:email', async (req, res) => {
+    try {
+        const email = req.params.email;
+        const userRequests = await Request.find({ borrowerEmail: email, isApproved: true });
+
+        res.json(userRequests);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.get('/users/:id', getUser, async(req, res) => {
     // View logged in user profile
-    res.send(req.user)
+    try {
+        await User.findById(req.params.id);
+        res.json(req.user)
+    } catch (error) {
+        res.status(500).send({ error })
+    }
 })
 
-// Route to handle forgot password request
+// lấy lại mật khẩu
 router.post('/users/forgot-password/:email', async (req, res) => {
     try {
         const email = req.params.email
@@ -169,7 +205,7 @@ router.post('/users/forgot-password/:email', async (req, res) => {
     }
 })
 
-router.post('/users/me/logout', auth, async (req, res) => {
+router.post('/users/logout', auth, async (req, res) => {
     // Log user out of the application
     try {
         req.user.tokens = req.user.tokens.filter((token) => {
@@ -181,5 +217,19 @@ router.post('/users/me/logout', auth, async (req, res) => {
         res.status(500).send(error)
     }
 })
+
+async function getUser(req, res, next) {
+    let user;
+    try {
+        user = await User.findById(req.params.id);
+        if (user == null) {
+            return res.status(404).json({ message: 'Cannot find user' });
+        }
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+    res.user = user;
+    next();
+}
 
 module.exports = router

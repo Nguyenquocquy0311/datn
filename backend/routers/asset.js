@@ -28,39 +28,49 @@ router.post('/assets', async (req, res) => {
     }
 });
 
-// Route để cập nhật thông tin của một tài sản
-router.patch('/assets/:id', getAsset, async (req, res) => {
-    if (req.body.name != null) {
-        res.asset.name = req.body.name;
-    }
-    if (req.body.price != null) {
-        res.asset.price = req.body.price;
-    }
-    // Tiếp tục cập nhật các trường khác nếu cần
+router.put('/assets/:id', async (req, res) => {
+  const updates = Object.keys(req.body);
+  const allowedUpdates = ['name', 'quantity', 'category', 'condition', 'price', 'status']; // Replace with your asset properties
+  const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
 
-    try {
-        const updatedAsset = await res.asset.save();
-        res.json(updatedAsset);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
+  if (!isValidOperation) {
+    return res.status(400).send({ error: 'Invalid updates!' });
+  }
+
+  try {
+    const asset = await Asset.findById(req.params.id);
+    if (!asset) {
+      return res.status(404).send({ error: 'Asset not found' });
     }
+
+    updates.forEach((update) => {
+      asset[update] = req.body[update];
+    });
+
+    await asset.save();
+    res.send(asset);
+  } catch (error) {
+    res.status(400).send(error);
+  }
 });
+
 
 // Route để xóa một tài sản
 router.delete('/assets/:id', getAsset, async (req, res) => {
     try {
-        await res.asset.remove();
+        await res.asset.remove;
+        await Asset.findByIdAndDelete(req.params.id);
         res.json({ message: 'Asset deleted' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 });
 
-// Middleware để lấy tài sản bằng name
+// Middleware để lấy tài sản bằng id
 async function getAsset(req, res, next) {
     let asset;
     try {
-        asset = await Asset.findById(req.params.name);
+        asset = await Asset.findById(req.params.id);
         if (asset == null) {
             return res.status(404).json({ message: 'Cannot find asset' });
         }

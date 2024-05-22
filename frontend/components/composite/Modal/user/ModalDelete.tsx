@@ -1,14 +1,34 @@
 import React from "react";
+import { ToastContainer, toast } from "react-toastify";
 
-const ModalDelete = ({ isOpen, onClose, onSave, assetData }) => {
-  const handleSubmit = (e) => {
+const ModalDelete = ({ isOpen, onClose, onSave, userId }) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     onSave();
     onClose();
+
+  try {
+    const response = await fetch(`http://localhost:4000/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      toast.success('Xoá thành công!');
+    } else {
+      const error = new Error(response.statusText);
+      throw error;
+    }
+  } catch (error) {
+    console.error("Error deleting asset:", error); // Handle error
+  }
   };
 
   return (
     <>
+      <ToastContainer />
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-gray-500 bg-opacity-50">
           <div className="relative bg-white w-full max-w-md p-6 rounded-lg">
@@ -19,7 +39,7 @@ const ModalDelete = ({ isOpen, onClose, onSave, assetData }) => {
               &times;
             </button>
             <h2 className="text-2xl font-bold mb-4 text-center">Confirm Delete</h2>
-            <p className="text-center text-red-500 mb-4">Are you sure you want to delete this asset?</p>
+            <p className="text-center text-red-500 mb-4">Bạn có chắc chắn muốn xoá người dùng này ?</p>
             <div className="text-center">
               <button
                 onClick={handleSubmit}

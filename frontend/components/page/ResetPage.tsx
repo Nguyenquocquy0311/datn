@@ -7,6 +7,7 @@ import { routes } from "@/constant/routes";
 const ResetPage = () => {
   const [email, setEmail] = useState("");
   const router = useRouter();
+  const [showBtnLogIn, setShowBtnLogIn] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,6 +32,7 @@ const ResetPage = () => {
           router.push(routes.login);
         }
       });
+      setShowBtnLogIn(true)
     } catch (error) {
       // Hiển thị thông báo lỗi
       toast.error('Failed to send reset password email. Please try again.');
@@ -78,6 +80,7 @@ const ResetPage = () => {
               >
                 Gửi email
               </button>
+              {showBtnLogIn && <button onClick={() => router.push(routes.login)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Đăng nhập</button>}
             </div>
           </form>
         </div>
